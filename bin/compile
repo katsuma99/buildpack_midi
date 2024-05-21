@@ -38,7 +38,7 @@ mv $FLUIDSYNTH_DIR/lib/* $FLUIDSYNTH_DIR/bin/
 
 # Add the Fluidsynth binaries to the PATH
 mkdir -p $BUILD_DIR/.profile.d
-echo "export PATH=\$PATH:/app/vendor/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
+echo "export PATH=\$PATH:/app/vendor/fluidsynth/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
 
 
 echo "-----> Fluidsynth installation complete"
