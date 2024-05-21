@@ -5,6 +5,8 @@ CACHE_DIR=$2
 
 # Directory where fluidsynth will be installed
 FLUIDSYNTH_DIR=$BUILD_DIR/fluidsynth
+FLUIDSYNTH_DIR=/app/vendor/fluidsynth
+mkdir -p $FLUIDSYNTH_DIR
 
 echo "-----> Installing Fluidsynth"
 
