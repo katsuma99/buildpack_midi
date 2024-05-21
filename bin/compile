@@ -4,7 +4,7 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 
 # Directory where fluidsynth will be installed
-FLUIDSYNTH_DIR=$BUILD_DIR/.fluidsynth
+FLUIDSYNTH_DIR=$BUILD_DIR/fluidsynth
 
 echo "-----> Installing Fluidsynth"
 
@@ -16,10 +16,10 @@ echo "-----> Installing Fluidsynth"
 # mkdir -p $FLUIDSYNTH_DIR
 
 # Download and extract Fluidsynth
-FLUIDSYNTH_VERSION="2.2.9"
+FLUIDSYNTH_VERSION="2.3.5"
 FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$FLUIDSYNTH_VERSION.tar.gz"
 
-mkdir -p /tmp/fluidsynth
+# mkdir -p /tmp/fluidsynth
 curl -L $FLUIDSYNTH_URL | tar xz -C /tmp/fluidsynth --strip-components=1
 
 # Build and install Fluidsynth
@@ -30,7 +30,15 @@ cmake ..
 make
 make install DESTDIR=$FLUIDSYNTH_DIR
 
+
+# Move the installed files to a standard location
+mv $FLUIDSYNTH_DIR/usr/local/* $FLUIDSYNTH_DIR/
+
 # Add the Fluidsynth binaries to the PATH
-echo "export PATH=\$PATH:$FLUIDSYNTH_DIR/usr/local/bin" >> $BUILD_DIR/.profile.d/fluidsynth.sh
+mkdir -p $BUILD_DIR/.profile.d
+echo "export PATH=\$PATH:$FLUIDSYNTH_DIR/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
+
+# Add the Fluidsynth library path to LD_LIBRARY_PATH
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$FLUIDSYNTH_DIR/lib" >> $BUILD_DIR/.profile.d/fluidsynth.sh
 
 echo "-----> Fluidsynth installation complete"
