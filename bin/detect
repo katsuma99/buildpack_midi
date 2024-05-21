@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "Fluidsynth Buildpack"
+exit 0

@@ -1,0 +1,34 @@
+#!/bin/sh
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+# Directory where fluidsynth will be installed
+FLUIDSYNTH_DIR=$BUILD_DIR/.fluidsynth
+
+echo "-----> Installing Fluidsynth"
+
+# Install dependencies (if any)
+# Here we assume dependencies are managed through a package manager like apt-get or similar, for example:
+# sudo apt-get update
+# sudo apt-get install -y cmake libglib2.0-dev libsndfile1-dev libreadline-dev
+
+# Download and extract Fluidsynth
+FLUIDSYNTH_VERSION="2.3.5"
+FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$FLUIDSYNTH_VERSION.tar.gz"
+
+mkdir -p /tmp/fluidsynth
+curl -L $FLUIDSYNTH_URL | tar xz -C /tmp/fluidsynth --strip-components=1
+
+# Build and install Fluidsynth
+cd /tmp/fluidsynth
+mkdir build
+cd build
+cmake ..
+make
+make install DESTDIR=$FLUIDSYNTH_DIR
+
+# Add the Fluidsynth binaries to the PATH
+echo "export PATH=\$PATH:$FLUIDSYNTH_DIR/usr/local/bin" >> $BUILD_DIR/.profile.d/fluidsynth.sh
+
+echo "-----> Fluidsynth installation complete"
