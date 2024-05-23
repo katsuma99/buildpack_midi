@@ -17,7 +17,8 @@ echo "-----> Installing Fluidsynth"
 # mkdir -p $FLUIDSYNTH_DIR
 
 # Download and extract Fluidsynth
-FLUIDSYNTH_VERSION="2.3.5"
+# FLUIDSYNTH_VERSION="2.3.5"
+FLUIDSYNTH_VERSION="2.1.7"
 FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$FLUIDSYNTH_VERSION.tar.gz"
 
 mkdir -p /tmp/fluidsynth
@@ -39,6 +40,7 @@ make install DESTDIR=$FLUIDSYNTH_DIR
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\$PATH:$HOME/vendor/fluidsynth/usr/local/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib" >> $BUILD_DIR/.profile.d/fluidsynth.sh
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib64" >> $BUILD_DIR/.profile.d/fluidsynth.sh
 
 
 echo "-----> Fluidsynth installation complete"
