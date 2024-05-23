@@ -28,7 +28,14 @@ curl -L $FLUIDSYNTH_URL | tar xz -C /tmp/fluidsynth --strip-components=1
 cd /tmp/fluidsynth
 mkdir build
 cd build
-cmake .. -Denable-libsndfile=0 -Denable-dbus=0 -Denable-pulseaudio=0 -Denable-jack=0
+cmake .. \
+-Denable-jack=true \
+-Denable-libsndfile=true \
+-Denable-dbus=auto \
+-Denable-readline=true \
+-Denable-portaudio=true \
+-Denable-alsa=true \
+-Denable-pulseaudio=true
 make
 make install DESTDIR=$FLUIDSYNTH_DIR
 
