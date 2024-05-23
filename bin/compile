@@ -17,7 +17,8 @@ echo "-----> Installing Fluidsynth"
 # mkdir -p $FLUIDSYNTH_DIR
 
 # Download and extract Fluidsynth
-FLUIDSYNTH_VERSION="2.3.5"
+# FLUIDSYNTH_VERSION="2.3.5"
+FLUIDSYNTH_VERSION="2.1.7"
 FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$FLUIDSYNTH_VERSION.tar.gz"
 
 mkdir -p /tmp/fluidsynth
