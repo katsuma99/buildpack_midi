@@ -1,46 +1,92 @@
-#!/bin/sh
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir> <env-dir>
 
-BUILD_DIR=$1
-CACHE_DIR=$2
+header() {
+  echo "" || true
+  echo "-----> $*" || true
+}
 
-# Directory where fluidsynth will be installed
-FLUIDSYNTH_DIR=$BUILD_DIR/vendor/fluidsynth
+# export_env_dir() {
+#   env_dir=$1
+#   acceptlist_regex=${2:-''}
+#   denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
+#   if [ -d "$env_dir" ]; then
+#     for e in $(ls $env_dir); do
+#       echo "$e" | grep -E "$acceptlist_regex" | grep -qvE "$denylist_regex" &&
+#       export "$e=$(cat $env_dir/$e)"
+#       :
+#     done
+#   fi
+# }
+
+output() {
+  while IFS= read -r LINE; do
+    # do not indent headers that are being piped through the output
+    if [[ "$LINE" =~ ^-----\>.* ]]; then
+      echo "$LINE" || true
+    else
+      echo "       $LINE" || true
+    fi
+  done
+}
+
+header "Installing Fluidsynth"
+
+BUILD_DIR=${1:-}
+ENV_DIR=${3:-}
+# export_env_dir $ENV_DIR
+
+VENDOR_DIR="vendor"
+FLUIDSYNTH_VERSION="2.3.5"
+FLUIDSYNTH_ARCHIVE_NAME="v$FLUIDSYNTH_VERSION.tar.gz"
+
+FLUIDSYNTH_DIR=$BUILD_DIR/$VENDOR_DIR/fluidsynth
 mkdir -p $FLUIDSYNTH_DIR
 
-echo "-----> Installing Fluidsynth"
 
-# Install dependencies (if any)
-# Here we assume dependencies are managed through a package manager like apt-get or similar, for example:
-# sudo apt-get update
-# sudo apt-get install -y cmake libglib2.0-dev libsndfile1-dev libreadline-dev
+FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/$FLUIDSYNTH_ARCHIVE_NAME"
 
-# mkdir -p $FLUIDSYNTH_DIR
-
-# Download and extract Fluidsynth
-# FLUIDSYNTH_VERSION="2.3.5"
-FLUIDSYNTH_VERSION="2.1.7"
-FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$FLUIDSYNTH_VERSION.tar.gz"
-
-mkdir -p /tmp/fluidsynth
-curl -L $FLUIDSYNTH_URL | tar xz -C /tmp/fluidsynth --strip-components=1
-
-# Build and install Fluidsynth
-cd /tmp/fluidsynth
-mkdir build
-cd build
-cmake ..
-make
-make install DESTDIR=$FLUIDSYNTH_DIR
+echo "Downloading $FLUIDSYNTH_URL" | output
 
 
-# Move the installed files to a standard location
-mv $FLUIDSYNTH_DIR/usr/local/* $FLUIDSYNTH_DIR/
-# mv $FLUIDSYNTH_DIR/lib/* $FLUIDSYNTH_DIR/bin/
+TEMP_DIR=/tmp/fluidsynth
+mkdir -p $TEMP_DIR
+
+code=$(curl "$FLUIDSYNTH_URL" -L --silent --fail --retry 5 --retry-max-time 15 -o $TEMP_DIR --write-out "%{http_code}")
+if [ "$code" != "200" ]; then
+  echo "Unable to download ffmpeg: $code" | output && exit 1
+fi
+
+echo "Unpacking the archive" | output
+
+tar xz -C $TEMP_DIR --strip-components=1
+
+if [ "$?" != "0" ]; then
+  echo "Failed to unpack" | output && exit 1
+fi
+
+rm $TEMP_DIR
+
+
+# # Build and install Fluidsynth
+# cd /tmp/fluidsynth
+# mkdir build
+# cd build
+# cmake ..
+# make
+# make install DESTDIR=$FLUIDSYNTH_DIR
+
+
+# # Move the installed files to a standard location
+# mv $FLUIDSYNTH_DIR/usr/local/* $FLUIDSYNTH_DIR/
+# # mv $FLUIDSYNTH_DIR/lib/* $FLUIDSYNTH_DIR/bin/
+
+
+PROFILE_PATH="$BUILD_DIR/.profile.d/fluidsynth.sh"
 
 # Add the Fluidsynth binaries to the PATH
-mkdir -p $BUILD_DIR/.profile.d
-echo "export PATH=\$PATH:/app/vendor/fluidsynth/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
-echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/app/vendor/fluidsynth/lib64" >> $BUILD_DIR/.profile.d/fluidsynth.sh
-
+mkdir -p $PROFILE_PATH
+echo "export PATH=\$PATH:${HOME}/vendor/fluidsynth/bin" > $PROFILE_PATH
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:${HOME}/vendor/fluidsynth/lib" >> $PROFILE_PATH
 
 echo "-----> Fluidsynth installation complete"
