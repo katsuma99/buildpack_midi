@@ -11,8 +11,36 @@ echo "-----> Installing Fluidsynth"
 
 # Install dependencies (if any)
 # Here we assume dependencies are managed through a package manager like apt-get or similar, for example:
-apt-get update
-apt-get install -y fluidsynth
+# sudo apt-get update
+# sudo apt-get install -y cmake libglib2.0-dev libsndfile1-dev libreadline-dev
+
+# mkdir -p $FLUIDSYNTH_DIR
+
+# Download and extract Fluidsynth
+# FLUIDSYNTH_VERSION="2.3.5"
+FLUIDSYNTH_VERSION="2.1.7"
+FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$FLUIDSYNTH_VERSION.tar.gz"
+
+mkdir -p /tmp/fluidsynth
+curl -L $FLUIDSYNTH_URL | tar xz -C /tmp/fluidsynth --strip-components=1
+
+# Build and install Fluidsynth
+cd /tmp/fluidsynth
+mkdir build
+cd build
+cmake ..
+make
+make install DESTDIR=$FLUIDSYNTH_DIR
+
+# Move the installed files to a standard location
+# mv $FLUIDSYNTH_DIR/usr/local/* $FLUIDSYNTH_DIR/
+# mv $FLUIDSYNTH_DIR/lib/* $FLUIDSYNTH_DIR/bin/
+
+# Add the Fluidsynth binaries to the PATH
+mkdir -p $BUILD_DIR/.profile.d
+echo "export PATH=\$PATH:$HOME/vendor/fluidsynth/usr/local/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib" >> $BUILD_DIR/.profile.d/fluidsynth.sh
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib64" >> $BUILD_DIR/.profile.d/fluidsynth.sh
 
 
 echo "-----> Fluidsynth installation complete"
