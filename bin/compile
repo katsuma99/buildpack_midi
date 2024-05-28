@@ -16,7 +16,7 @@ LIBSND_DIR=$BUILD_DIR/vendor/libsnd
 mkdir -p $LIBSND_DIR
 
 cd $LIBSND_SRC_DIR || exit
-./configure
+./configure --prefix=$LIBSND_DIR
 make
 make install
 
@@ -42,7 +42,7 @@ FLUIDSYNTH_DIR=$BUILD_DIR/vendor/fluidsynth
 mkdir -p $FLUIDSYNTH_DIR
 
 cd $FLUIDSYNTH_BUILD_DIR || exit
-cmake .. -Denable-libsndfile=ON 
+cmake .. -Denable-libsndfile=ON  -DCMAKE_PREFIX_PATH=$LIBSND_DIR
 make
 make install DESTDIR=$FLUIDSYNTH_DIR
 
@@ -52,7 +52,7 @@ make install DESTDIR=$FLUIDSYNTH_DIR
 
 # Add the Fluidsynth binaries to the PATH
 mkdir -p $BUILD_DIR/.profile.d
-echo "export PATH=\$PATH:$HOME/vendor/fluidsynth/usr/local/bin:$HOME/vendor/libsnd/usr/local/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
-echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib:$HOME/vendor/fluidsynth/usr/local/lib64:$HOME/vendor/libsnd/usr/local/lib" >> $BUILD_DIR/.profile.d/fluidsynth.sh
+echo "export PATH=\$PATH:$HOME/vendor/fluidsynth/usr/local/bin:$HOME/vendor/libsnd/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib:$HOME/vendor/fluidsynth/usr/local/lib64:$HOME/vendor/libsnd/lib" >> $BUILD_DIR/.profile.d/fluidsynth.sh
 
 echo "-----> Fluidsynth installation complete"
