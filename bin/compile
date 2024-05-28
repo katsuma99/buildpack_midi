@@ -22,7 +22,7 @@ mkdir -p $LIBSND_DIR
 cd $LIBSND_BUILD_DIR || exit
 ../configure
 make
-make install DESTDIR=$LIBSND_DIR
+make install
 
 echo "-----> libsndfile installation complete"
 
