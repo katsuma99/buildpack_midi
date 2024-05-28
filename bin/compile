@@ -5,7 +5,7 @@ CACHE_DIR=$2
 
 
 # midi->wavへ変換する依存ライブラリlibsndfileをインストール(通常はRAW PCMファイルへのレンダリングのみサポート)
-LIBSND_SRC_DIR=$BUILD_DIR/vendor/libsnd
+LIBSND_SRC_DIR=/temp/libsnd
 mkdir -p $LIBSND_SRC_DIR
 
 echo "-----> Installing libsndfile"
@@ -16,11 +16,13 @@ curl -L $SND_URL | tar xz -C $LIBSND_SRC_DIR --strip-components=1
 LIBSND_BUILD_DIR=$LIBSND_SRC_DIR/build
 mkdir -p $LIBSND_BUILD_DIR
 
+LIBSND_DIR=$BUILD_DIR/vendor/libsnd
+mkdir -p $LIBSND_DIR
+
 cd $LIBSND_BUILD_DIR || exit
 ../configure
 make
-make check
-make install
+make install DESTDIR=$LIBSND_DIR
 
 echo "-----> libsndfile installation complete"
 
@@ -54,11 +56,7 @@ make install DESTDIR=$FLUIDSYNTH_DIR
 
 # Add the Fluidsynth binaries to the PATH
 mkdir -p $BUILD_DIR/.profile.d
-echo "export PATH=\$PATH:$HOME/vendor/fluidsynth/usr/local/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
-echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib" >> $BUILD_DIR/.profile.d/fluidsynth.sh
-echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib64" >> $BUILD_DIR/.profile.d/fluidsynth.sh
-
-echo "export PATH=\$PATH:$HOME/vendor/libsnd/build" > $BUILD_DIR/.profile.d/fluidsynth.sh
-echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/vendor/libsnd/build" >> $BUILD_DIR/.profile.d/fluidsynth.sh
+echo "export PATH=\$PATH:$HOME/vendor/fluidsynth/usr/local/bin:$HOME/vendor/libsnd/usr/local/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib:$HOME/vendor/fluidsynth/usr/local/lib64:$HOME/vendor/libsnd/usr/local/lib" >> $BUILD_DIR/.profile.d/fluidsynth.sh
 
 echo "-----> Fluidsynth installation complete"
