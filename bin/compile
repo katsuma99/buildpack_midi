@@ -19,6 +19,7 @@ mkdir -p $LIBSND_BUILD_DIR
 cd $LIBSND_BUILD_DIR || exit
 ../configure
 make
+make check
 make install
 
 echo "-----> libsndfile installation complete"
@@ -56,5 +57,8 @@ mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\$PATH:$HOME/vendor/fluidsynth/usr/local/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib" >> $BUILD_DIR/.profile.d/fluidsynth.sh
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib64" >> $BUILD_DIR/.profile.d/fluidsynth.sh
+
+echo "export PATH=\$PATH:$HOME/vendor/libsnd/build" > $BUILD_DIR/.profile.d/fluidsynth.sh
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/vendor/libsnd/build" >> $BUILD_DIR/.profile.d/fluidsynth.sh
 
 echo "-----> Fluidsynth installation complete"
