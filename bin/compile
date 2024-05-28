@@ -3,40 +3,47 @@
 BUILD_DIR=$1
 CACHE_DIR=$2
 
-# Directory where fluidsynth will be installed
+
+# midi->wavへ変換する依存ライブラリlibsndfileをインストール(通常はRAW PCMファイルへのレンダリングのみサポート)
+LIBSND_SRC_DIR=/tmp/libsnd
+mkdir -p $LIBSND_SRC_DIR
+
+echo "-----> Installing libsndfile"
+SND_URL="http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.28.tar.gz"
+curl -L $SND_URL | tar xz -C $LIBSND_SRC_DIR --strip-components=1
+
+
+LIBSND_BUILD_DIR=/tmp/libsnd/build
+mkdir -p $LIBSND_BUILD_DIR
+
+cd $LIBSND_BUILD_DIR || exit
+../configure
+make
+make install
+
+echo "-----> libsndfile installation complete"
+
+
+# fluidsynthをインストール
+echo "-----> Installing Fluidsynth"
+
+# FLUIDSYNTH_VERSION="2.3.5"
+FLUIDSYNTH_SRC_DIR=/tmp/fluidsynth
+FLUIDSYNTH_VERSION="2.1.7"
+FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$FLUIDSYNTH_VERSION.tar.gz"
+
+mkdir -p $FLUIDSYNTH_SRC_DIR
+curl -L $FLUIDSYNTH_URL | tar xz -C $FLUIDSYNTH_SRC_DIR --strip-components=1
+
+# Build and install Fluidsynth
+FLUIDSYNTH_BUILD_DIR=$FLUIDSYNTH_SRC_DIR/build
+mkdir $FLUIDSYNTH_BUILD_DIR
+
 FLUIDSYNTH_DIR=$BUILD_DIR/vendor/fluidsynth
 mkdir -p $FLUIDSYNTH_DIR
 
-echo "-----> Installing Fluidsynth"
-
-# Install dependencies (if any)
-# Here we assume dependencies are managed through a package manager like apt-get or similar, for example:
-# sudo apt-get update
-# sudo apt-get install -y cmake libglib2.0-dev libsndfile1-dev libreadline-dev
-
-# mkdir -p $FLUIDSYNTH_DIR
-
-# Download and extract Fluidsynth
-# FLUIDSYNTH_VERSION="2.3.5"
-# FLUIDSYNTH_VERSION="2.1.7"
-FLUIDSYNTH_VERSION="2.1.9"
-FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$FLUIDSYNTH_VERSION.tar.gz"
-
-mkdir -p /tmp/fluidsynth
-curl -L $FLUIDSYNTH_URL | tar xz -C /tmp/fluidsynth --strip-components=1
-
-# Build and install Fluidsynth
-cd /tmp/fluidsynth
-mkdir build
-cd build
-cmake .. \
--Denable-jack=true \
--Denable-libsndfile=true \
--Denable-dbus=auto \
--Denable-readline=true \
--Denable-portaudio=true \
--Denable-alsa=true \
--Denable-pulseaudio=true
+cd $FLUIDSYNTH_BUILD_DIR || exit
+cmake .. -Denable-libsndfile=ON 
 make
 make install DESTDIR=$FLUIDSYNTH_DIR
 
@@ -49,6 +56,5 @@ mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\$PATH:$HOME/vendor/fluidsynth/usr/local/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib" >> $BUILD_DIR/.profile.d/fluidsynth.sh
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib64" >> $BUILD_DIR/.profile.d/fluidsynth.sh
-
 
 echo "-----> Fluidsynth installation complete"
