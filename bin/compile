@@ -5,22 +5,18 @@ CACHE_DIR=$2
 
 
 # midi->wavへ変換する依存ライブラリlibsndfileをインストール(通常はRAW PCMファイルへのレンダリングのみサポート)
-LIBSND_SRC_DIR=/temp/libsnd
+LIBSND_SRC_DIR=/tmp/libsnd
 mkdir -p $LIBSND_SRC_DIR
 
 echo "-----> Installing libsndfile"
 SND_URL="http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.28.tar.gz"
 curl -L $SND_URL | tar xz -C $LIBSND_SRC_DIR --strip-components=1
 
-
-LIBSND_BUILD_DIR=$LIBSND_SRC_DIR/build
-mkdir -p $LIBSND_BUILD_DIR
-
 LIBSND_DIR=$BUILD_DIR/vendor/libsnd
 mkdir -p $LIBSND_DIR
 
-cd $LIBSND_BUILD_DIR || exit
-../configure
+cd $LIBSND_SRC_DIR || exit
+./configure
 make
 make install
 
