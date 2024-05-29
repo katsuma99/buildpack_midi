@@ -24,6 +24,8 @@ if [ ! -d "$LIBSND_CACHE_DIR" ]; then
     make
     make install
     echo "-----> libsndfile installation complete"
+else
+    echo "-----> libsndfile use cache"
 fi
 
 mkdir -p $LIBSND_DIR
@@ -59,6 +61,8 @@ if [ ! -d "$FLUIDSYNTH_CACHE_DIR" ]; then
     make
     make install DESTDIR=$FLUIDSYNTH_CACHE_DIR
     echo "-----> Fluidsynth installation complete"
+else
+    echo "-----> Fluidsynth use cache"
 fi
 
 mkdir -p $FLUIDSYNTH_DIR
