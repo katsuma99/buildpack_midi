@@ -5,54 +5,68 @@ CACHE_DIR=$2
 
 
 # midi->wavへ変換する依存ライブラリlibsndfileをインストール(通常はRAW PCMファイルへのレンダリングのみサポート)
-LIBSND_SRC_DIR=/tmp/libsnd
-mkdir -p $LIBSND_SRC_DIR
-
-echo "-----> Installing libsndfile"
-SND_URL="http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.28.tar.gz"
-curl -L $SND_URL | tar xz -C $LIBSND_SRC_DIR --strip-components=1
-
+LIBSND_CACHE_DIR=$CACHE_DIR/libsnd
 LIBSND_DIR=$BUILD_DIR/vendor/libsnd
+# $LIBSND_CACHE_DIR が存在しない場合インストール
+if [ ! -d "$LIBSND_CACHE_DIR" ]; then
+    echo "-----> Installing libsndfile"
+
+    LIBSND_SRC_DIR=/tmp/libsnd
+    SND_URL="http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.28.tar.gz"
+
+    mkdir -p $LIBSND_SRC_DIR
+    curl -L $SND_URL | tar xz -C $LIBSND_SRC_DIR --strip-components=1
+
+    mkdir -p $LIBSND_CACHE_DIR
+
+    cd $LIBSND_SRC_DIR || return
+    ./configure --prefix=$LIBSND_CACHE_DIR
+    make
+    make install
+    echo "-----> libsndfile installation complete"
+fi
+
 mkdir -p $LIBSND_DIR
+cp -r $LIBSND_CACHE_DIR/* $LIBSND_DIR
 
-cd $LIBSND_SRC_DIR || exit
-./configure --prefix=$LIBSND_DIR
-make
-make install
 
-echo "-----> libsndfile installation complete"
+
 
 
 # fluidsynthをインストール
-echo "-----> Installing Fluidsynth"
-
-# FLUIDSYNTH_VERSION="2.3.5"
-FLUIDSYNTH_SRC_DIR=/tmp/fluidsynth
-FLUIDSYNTH_VERSION="2.1.7"
-FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$FLUIDSYNTH_VERSION.tar.gz"
-
-mkdir -p $FLUIDSYNTH_SRC_DIR
-curl -L $FLUIDSYNTH_URL | tar xz -C $FLUIDSYNTH_SRC_DIR --strip-components=1
-
-# Build and install Fluidsynth
-FLUIDSYNTH_BUILD_DIR=$FLUIDSYNTH_SRC_DIR/build
-mkdir $FLUIDSYNTH_BUILD_DIR
-
+FLUIDSYNTH_CACHE_DIR=$CACHE_DIR/fluidsynth
 FLUIDSYNTH_DIR=$BUILD_DIR/vendor/fluidsynth
+
+# $FLUIDSYNTH_CACHE_DIR が存在しない場合インストール
+if [ ! -d "$FLUIDSYNTH_CACHE_DIR" ]; then
+    echo "-----> Installing Fluidsynth"
+
+    # FLUIDSYNTH_VERSION="2.3.5"
+    FLUIDSYNTH_SRC_DIR=/tmp/fluidsynth
+    FLUIDSYNTH_VERSION="2.1.7"
+    FLUIDSYNTH_URL="https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$FLUIDSYNTH_VERSION.tar.gz"
+
+    mkdir -p $FLUIDSYNTH_SRC_DIR
+    curl -L $FLUIDSYNTH_URL | tar xz -C $FLUIDSYNTH_SRC_DIR --strip-components=1
+
+    FLUIDSYNTH_BUILD_DIR=$FLUIDSYNTH_SRC_DIR/build
+    mkdir $FLUIDSYNTH_BUILD_DIR
+
+    mkdir -p $FLUIDSYNTH_CACHE_DIR
+
+    cd $FLUIDSYNTH_BUILD_DIR || return
+    cmake .. -Denable-libsndfile=ON  -DCMAKE_PREFIX_PATH=$LIBSND_DIR
+    make
+    make install DESTDIR=$FLUIDSYNTH_CACHE_DIR
+    echo "-----> Fluidsynth installation complete"
+fi
+
 mkdir -p $FLUIDSYNTH_DIR
+cp -r $FLUIDSYNTH_CACHE_DIR/* $FLUIDSYNTH_DIR
 
-cd $FLUIDSYNTH_BUILD_DIR || exit
-cmake .. -Denable-libsndfile=ON  -DCMAKE_PREFIX_PATH=$LIBSND_DIR
-make
-make install DESTDIR=$FLUIDSYNTH_DIR
-
-# Move the installed files to a standard location
-# mv $FLUIDSYNTH_DIR/usr/local/* $FLUIDSYNTH_DIR/
-# mv $FLUIDSYNTH_DIR/lib/* $FLUIDSYNTH_DIR/bin/
 
 # Add the Fluidsynth binaries to the PATH
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\$PATH:$HOME/vendor/fluidsynth/usr/local/bin:$HOME/vendor/libsnd/bin" > $BUILD_DIR/.profile.d/fluidsynth.sh
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$HOME/vendor/fluidsynth/usr/local/lib:$HOME/vendor/fluidsynth/usr/local/lib64:$HOME/vendor/libsnd/lib" >> $BUILD_DIR/.profile.d/fluidsynth.sh
 
-echo "-----> Fluidsynth installation complete"
